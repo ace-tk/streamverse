@@ -1,5 +1,6 @@
 import uuid
 from typing import Optional
+from enum import Enum
 from fastapi import APIRouter, Depends, Query, status
 
 from backend.src.schemas.stream import (
@@ -8,6 +9,13 @@ from backend.src.schemas.stream import (
     StreamDetailResponse, 
     PaginatedStreamResponse
 )
+from backend.src.models.stream import StreamStatus
+
+
+class SortBy(str, Enum):
+    newest = "newest"
+    oldest = "oldest"
+    viewers = "viewers"
 from backend.src.models.user import User
 from backend.src.services.stream import StreamService
 from backend.src.dependencies.auth import get_current_user
@@ -57,19 +65,30 @@ async def end_stream(
 @router.get(
     "",
     response_model=PaginatedStreamResponse,
-    summary="List all active live streams"
+    summary="Discover streams with filtering and sorting"
 )
 async def list_live_streams(
     page: int = Query(1, ge=1, description="Page number"),
     size: int = Query(20, ge=1, le=100, description="Number of items per page"),
-    category: Optional[str] = Query(None, description="Filter streams by category"),
+    category: Optional[str] = Query(None, description="Filter by category"),
+    status: Optional[StreamStatus] = Query(None, description="Filter by status: LIVE or ENDED. Defaults to LIVE."),
+    search: Optional[str] = Query(None, description="Case-insensitive partial match on stream title"),
+    sort_by: SortBy = Query(SortBy.newest, description="Sort order: newest, oldest, or viewers"),
     stream_service: StreamService = Depends(get_stream_service)
 ):
     """
-    Returns a paginated list of all currently LIVE streams, ordered by newest first.
-    Includes creator details and current viewer count.
+    Returns a paginated list of streams with optional filtering by status, category,
+    and title search. Supports sorting by newest, oldest, or viewer count.
+    Defaults to LIVE streams ordered newest first.
     """
-    streams, total = await stream_service.list_live_streams(page=page, size=size, category=category)
+    streams, total = await stream_service.list_live_streams(
+        page=page,
+        size=size,
+        category=category,
+        status=status,
+        search=search,
+        sort_by=sort_by.value,
+    )
     return PaginatedStreamResponse(
         items=streams,
         total=total,

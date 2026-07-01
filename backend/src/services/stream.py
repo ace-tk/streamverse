@@ -106,21 +106,40 @@ class StreamService:
         self, 
         page: int = 1, 
         size: int = 20, 
-        category: Optional[str] = None
+        category: Optional[str] = None,
+        status: Optional[StreamStatus] = None,
+        search: Optional[str] = None,
+        sort_by: str = "newest"
     ) -> Tuple[List[StreamListResponse], int]:
         
-        query = select(Stream).options(selectinload(Stream.creator)).where(Stream.status == StreamStatus.LIVE)
+        query = select(Stream).options(selectinload(Stream.creator))
         
+        if status:
+            query = query.where(Stream.status == status)
+        else:
+            # Preserve backward compatibility
+            query = query.where(Stream.status == StreamStatus.LIVE)
+            
         if category:
             query = query.where(Stream.category == category)
             
+        if search:
+            query = query.where(Stream.title.ilike(f"%{search}%"))
+
         # Count total
         count_query = select(func.count()).select_from(query.subquery())
         total_result = await self.db.execute(count_query)
         total = total_result.scalar() or 0
 
         # Pagination and ordering
-        query = query.order_by(Stream.started_at.desc())
+        if sort_by == "oldest":
+            query = query.order_by(Stream.started_at.asc())
+        elif sort_by == "viewers":
+            query = query.order_by(Stream.viewer_count.desc(), Stream.started_at.desc())
+        else:
+            # Default to newest
+            query = query.order_by(Stream.started_at.desc())
+
         query = query.offset((page - 1) * size).limit(size)
         
         result = await self.db.execute(query)
