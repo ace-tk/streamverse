@@ -39,4 +39,11 @@ class ConnectionManager:
                 except Exception:
                     pass
 
+    async def broadcast_chat(self, stream_id: str, message: str):
+        payload = {
+            "type": "chat",
+            "message": message
+        }
+        await self.broadcast(payload, stream_id)
+
 manager = ConnectionManager()

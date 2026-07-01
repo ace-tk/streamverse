@@ -23,11 +23,10 @@ async def websocket_endpoint(websocket: WebSocket, stream_id: str):
                 )
                 continue
             
-            # Echo message back
-            await manager.send_personal_message(
-                {"type": "echo", "message": parsed_data.get("message", "")}, 
-                websocket
-            )
+            # Broadcast chat message to all clients in the stream
+            message = parsed_data.get("message")
+            if message:
+                await manager.broadcast_chat(stream_id, message)
     except WebSocketDisconnect:
         await manager.disconnect(websocket, stream_id)
     except Exception as e:
