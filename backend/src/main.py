@@ -7,6 +7,7 @@ import logging
 from backend.src.core.config import settings
 from backend.src.database.session import engine
 from backend.src.api.v1 import api_router
+from backend.src.websocket.router import router as websocket_router
 
 # Configure logging for the application
 logger = logging.getLogger(__name__)
@@ -44,6 +45,9 @@ app = FastAPI(
 
 # Register API v1 router
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
+# Register WebSocket router
+app.include_router(websocket_router, prefix="/ws", tags=["WebSockets"])
 
 @app.get("/health", tags=["health"])
 async def health_check():
