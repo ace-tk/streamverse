@@ -126,3 +126,10 @@ class StreamService:
         streams = result.scalars().all()
         
         return streams, total
+
+    async def update_viewer_count(self, stream_id: uuid.UUID, viewer_count: int):
+        result = await self.db.execute(select(Stream).where(Stream.id == stream_id))
+        stream = result.scalars().first()
+        if stream:
+            stream.viewer_count = viewer_count
+            await self.db.commit()

@@ -5,6 +5,8 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
 from backend.src.websocket.manager import manager
 from backend.src.services.chat import ChatService
 from backend.src.dependencies.chat import get_chat_service
+from backend.src.services.stream import StreamService
+from backend.src.dependencies.stream import get_stream_service
 
 logger = logging.getLogger(__name__)
 
@@ -15,9 +17,10 @@ router = APIRouter()
 async def websocket_endpoint(
     websocket: WebSocket, 
     stream_id: str,
-    chat_service: ChatService = Depends(get_chat_service)
+    chat_service: ChatService = Depends(get_chat_service),
+    stream_service: StreamService = Depends(get_stream_service)
 ):
-    await manager.connect(websocket, stream_id)
+    await manager.connect(websocket, stream_id, stream_service)
     try:
         while True:
             data = await websocket.receive_text()
@@ -48,7 +51,7 @@ async def websocket_endpoint(
                 # Broadcast regardless of persistence success
                 await manager.broadcast_chat(stream_id, sender_name, message)
     except WebSocketDisconnect:
-        await manager.disconnect(websocket, stream_id)
+        await manager.disconnect(websocket, stream_id, stream_service)
     except Exception as e:
         logger.error(f"WebSocket error for stream {stream_id}: {e}")
-        await manager.disconnect(websocket, stream_id)
+        await manager.disconnect(websocket, stream_id, stream_service)
