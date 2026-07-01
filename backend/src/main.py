@@ -6,6 +6,7 @@ import logging
 
 from backend.src.core.config import settings
 from backend.src.database.session import engine
+from backend.src.api.v1 import api_router
 
 # Configure logging for the application
 logger = logging.getLogger(__name__)
@@ -40,6 +41,9 @@ app = FastAPI(
     version=settings.VERSION,
     lifespan=lifespan,
 )
+
+# Register API v1 router
+app.include_router(api_router, prefix=settings.API_V1_STR)
 
 @app.get("/health", tags=["health"])
 async def health_check():
