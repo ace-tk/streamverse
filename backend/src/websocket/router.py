@@ -1,14 +1,22 @@
 import json
+import uuid
 import logging
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
 from backend.src.websocket.manager import manager
+from backend.src.services.chat import ChatService
+from backend.src.dependencies.chat import get_chat_service
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
+
 @router.websocket("/streams/{stream_id}")
-async def websocket_endpoint(websocket: WebSocket, stream_id: str):
+async def websocket_endpoint(
+    websocket: WebSocket, 
+    stream_id: str,
+    chat_service: ChatService = Depends(get_chat_service)
+):
     await manager.connect(websocket, stream_id)
     try:
         while True:
@@ -18,15 +26,27 @@ async def websocket_endpoint(websocket: WebSocket, stream_id: str):
             except json.JSONDecodeError:
                 # Handle invalid json gracefully
                 await manager.send_personal_message(
-                    {"type": "error", "message": "Invalid JSON format"}, 
+                    {"type": "error", "message": "Invalid JSON format"},
                     websocket
                 )
                 continue
-            
+
             # Broadcast chat message to all clients in the stream
             message = parsed_data.get("message")
+            sender_name = parsed_data.get("sender_name", "Anonymous")
             if message:
-                await manager.broadcast_chat(stream_id, message)
+                # Persist to database
+                try:
+                    await chat_service.save_message(
+                        stream_id=uuid.UUID(stream_id),
+                        sender_name=sender_name,
+                        message=message,
+                    )
+                except Exception as e:
+                    logger.error(f"Failed to persist chat message: {e}")
+
+                # Broadcast regardless of persistence success
+                await manager.broadcast_chat(stream_id, sender_name, message)
     except WebSocketDisconnect:
         await manager.disconnect(websocket, stream_id)
     except Exception as e:
