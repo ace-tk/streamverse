@@ -55,4 +55,25 @@ class ConnectionManager:
         }
         await self.broadcast(payload, stream_id)
 
+    async def close_stream(self, stream_id: str):
+        """Close all connections for a stream and send stream_ended message."""
+        if stream_id in self.active_connections:
+            import logging
+            logger = logging.getLogger(__name__)
+            # Copy to avoid modifying while iterating
+            connections = list(self.active_connections[stream_id])
+            for connection in connections:
+                try:
+                    await connection.send_json({
+                        "type": "stream_ended",
+                        "message": "This live stream has ended."
+                    })
+                    await connection.close()
+                except Exception as e:
+                    logger.error(f"Failed to close websocket during stream termination: {e}")
+            
+            # Clean up the stream from manager
+            if stream_id in self.active_connections:
+                del self.active_connections[stream_id]
+
 manager = ConnectionManager()

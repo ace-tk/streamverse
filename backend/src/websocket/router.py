@@ -20,6 +20,19 @@ async def websocket_endpoint(
     chat_service: ChatService = Depends(get_chat_service),
     stream_service: StreamService = Depends(get_stream_service)
 ):
+    try:
+        stream = await stream_service.get_stream_details(uuid.UUID(stream_id))
+        from backend.src.models.stream import StreamStatus
+        if stream.status != StreamStatus.LIVE:
+            await websocket.accept()
+            await websocket.send_json({"type": "error", "message": "This stream is no longer live."})
+            await websocket.close(code=1008)
+            return
+    except Exception:
+        # Stream not found or invalid UUID
+        await websocket.close(code=1008)
+        return
+
     await manager.connect(websocket, stream_id, stream_service)
     try:
         while True:

@@ -46,7 +46,13 @@ async def end_stream(
     Ends a currently LIVE stream. Only the creator of the stream can end it.
     Updates the status to ENDED and sets the ended_at timestamp.
     """
-    return await stream_service.end_stream(stream_id=stream_id, user_id=current_user.id)
+    result = await stream_service.end_stream(stream_id=stream_id, user_id=current_user.id)
+    
+    # Close all associated websocket connections
+    from backend.src.websocket.manager import manager
+    await manager.close_stream(str(stream_id))
+    
+    return result
 
 @router.get(
     "",

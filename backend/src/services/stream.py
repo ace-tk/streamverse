@@ -67,6 +67,7 @@ class StreamService:
 
         stream.status = StreamStatus.ENDED
         stream.ended_at = func.now()
+        stream.viewer_count = 0
         
         await self.db.commit()
         await self.db.refresh(stream)
