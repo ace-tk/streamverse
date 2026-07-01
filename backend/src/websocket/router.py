@@ -29,7 +29,7 @@ async def websocket_endpoint(websocket: WebSocket, stream_id: str):
                 websocket
             )
     except WebSocketDisconnect:
-        manager.disconnect(websocket, stream_id)
+        await manager.disconnect(websocket, stream_id)
     except Exception as e:
         logger.error(f"WebSocket error for stream {stream_id}: {e}")
-        manager.disconnect(websocket, stream_id)
+        await manager.disconnect(websocket, stream_id)

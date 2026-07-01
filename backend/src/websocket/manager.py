@@ -11,12 +11,22 @@ class ConnectionManager:
         if stream_id not in self.active_connections:
             self.active_connections[stream_id] = set()
         self.active_connections[stream_id].add(websocket)
+        await self.broadcast_viewer_count(stream_id)
 
-    def disconnect(self, websocket: WebSocket, stream_id: str):
+    async def disconnect(self, websocket: WebSocket, stream_id: str):
         if stream_id in self.active_connections:
             self.active_connections[stream_id].discard(websocket)
             if not self.active_connections[stream_id]:
                 del self.active_connections[stream_id]
+            else:
+                await self.broadcast_viewer_count(stream_id)
+
+    def get_viewer_count(self, stream_id: str) -> int:
+        return len(self.active_connections.get(stream_id, set()))
+
+    async def broadcast_viewer_count(self, stream_id: str):
+        count = self.get_viewer_count(stream_id)
+        await self.broadcast({"type": "viewer_count", "count": count}, stream_id)
 
     async def send_personal_message(self, message: dict, websocket: WebSocket):
         await websocket.send_json(message)
