@@ -1,4 +1,5 @@
 import uuid
+import asyncio
 from typing import Optional
 from enum import Enum
 from fastapi import APIRouter, Depends, Query, status
@@ -20,6 +21,7 @@ from backend.src.models.user import User
 from backend.src.services.stream import StreamService
 from backend.src.dependencies.auth import get_current_user
 from backend.src.dependencies.stream import get_stream_service
+from backend.src.services.automation import automation_service
 
 router = APIRouter()
 
@@ -38,7 +40,21 @@ async def create_stream(
     Creates a new stream for the authenticated user and sets its status to LIVE.
     Prevents a user from having more than one active LIVE stream at a time.
     """
-    return await stream_service.create_stream(creator_id=current_user.id, stream_data=stream_data)
+    stream = await stream_service.create_stream(creator_id=current_user.id, stream_data=stream_data)
+    
+    # Trigger automation
+    asyncio.create_task(
+        automation_service.trigger_stream_started(
+            stream_id=str(stream.id),
+            creator_id=str(current_user.id),
+            creator_name=current_user.name,
+            title=stream.title,
+            category=stream.category,
+            started_at=stream.started_at.isoformat()
+        )
+    )
+    
+    return stream
 
 @router.patch(
     "/{stream_id}/end",

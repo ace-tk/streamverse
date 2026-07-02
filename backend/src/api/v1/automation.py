@@ -15,7 +15,10 @@ async def test_automation():
     success = await automation_service.trigger_stream_started(
         stream_id="test-stream-123",
         creator_id="test-creator-456",
-        title="Test Connectivity Stream"
+        creator_name="Test Creator",
+        title="Test Connectivity Stream",
+        category="Testing",
+        started_at="2026-07-02T10:00:00Z"
     )
     
     if not success:

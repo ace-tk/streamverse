@@ -29,8 +29,33 @@ class ConnectionManager:
         if stream_service:
             import uuid
             import logging
+            from backend.src.services.automation import automation_service
+            import asyncio
             try:
                 await stream_service.update_viewer_count(uuid.UUID(stream_id), count)
+                
+                # Milestone checking
+                milestones = [10, 25, 50, 100, 250, 500]
+                if count in milestones:
+                    reached = automation_service.milestones_reached.setdefault(stream_id, set())
+                    if count not in reached:
+                        reached.add(count)
+                        # Fetch stream details to get title, creator, etc.
+                        try:
+                            stream = await stream_service.get_stream_details(uuid.UUID(stream_id))
+                            asyncio.create_task(
+                                automation_service.trigger_viewer_milestone(
+                                    stream_id=str(stream.id),
+                                    creator_id=str(stream.creator_id),
+                                    title=stream.title,
+                                    creator_name=stream.creator.name,
+                                    viewer_count=count,
+                                    milestone=count
+                                )
+                            )
+                        except Exception as e:
+                            logger = logging.getLogger(__name__)
+                            logger.error(f"Failed to fetch stream details for milestone: {e}")
             except Exception as e:
                 logger = logging.getLogger(__name__)
                 logger.error(f"Failed to persist viewer count to DB: {e}")
@@ -75,5 +100,13 @@ class ConnectionManager:
             # Clean up the stream from manager
             if stream_id in self.active_connections:
                 del self.active_connections[stream_id]
+            
+            # Clean up milestones
+            try:
+                from backend.src.services.automation import automation_service
+                import asyncio
+                asyncio.create_task(automation_service.trigger_stream_ended(stream_id, 0))
+            except Exception as e:
+                pass
 
 manager = ConnectionManager()
