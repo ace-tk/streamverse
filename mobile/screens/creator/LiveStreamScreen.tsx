@@ -73,7 +73,10 @@ export default function LiveStreamScreen({ navigation, route }: Props) {
           setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
         } else if (data.type === 'stream_ended') {
           setSnackbar('Stream has ended.');
-          navigation.replace('CreatorHome');
+          ws.close();
+          // Let UI handle redirection, or redirect based on current state.
+          // Wait, 'stream' might be undefined in this closure. 
+          navigation.goBack();
         }
       } catch {
         // silently ignore non-JSON frames
@@ -109,7 +112,7 @@ export default function LiveStreamScreen({ navigation, route }: Props) {
     setChatInput('');
   };
 
-  // ─── End stream ───────────────────────────────────────────────────────────
+  // ─── End stream / Leave stream ────────────────────────────────────────────
   const handleEndStream = async () => {
     setEnding(true);
     try {
@@ -120,6 +123,11 @@ export default function LiveStreamScreen({ navigation, route }: Props) {
       setSnackbar(err.response?.data?.detail ?? 'Failed to end stream.');
       setEnding(false);
     }
+  };
+
+  const handleLeaveStream = () => {
+    wsRef.current?.close();
+    navigation.goBack();
   };
 
   // ─── Loading ──────────────────────────────────────────────────────────────
@@ -254,12 +262,20 @@ export default function LiveStreamScreen({ navigation, route }: Props) {
               ⚠ WebSocket disconnected
             </Text>
           )}
-          <PrimaryButton
-            label={ending ? 'Ending…' : '⏹  End Stream'}
-            onPress={handleEndStream}
-            loading={ending}
-            style={styles.endBtn}
-          />
+          {stream.creator_id === currentUser?.id ? (
+            <PrimaryButton
+              label={ending ? 'Ending…' : '⏹  End Stream'}
+              onPress={handleEndStream}
+              loading={ending}
+              style={styles.endBtn}
+            />
+          ) : (
+            <PrimaryButton
+              label="👋 Leave Stream"
+              onPress={handleLeaveStream}
+              style={styles.endBtn}
+            />
+          )}
         </View>
       </KeyboardAvoidingView>
 
