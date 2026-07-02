@@ -47,9 +47,10 @@ export default function LiveStreamScreen({ navigation, route }: Props) {
 
   // ─── WebSocket connection ────────────────────────────────────────────────
   const connectWs = useCallback(() => {
-    if (!token || !streamId) return;
+    if (!streamId) return;
 
-    const url = `${WEBSOCKET_BASE_URL}/ws/${streamId}?token=${token}`;
+    // Backend WS path: /ws/streams/{stream_id}  (registered as prefix=/ws + route=/streams/{stream_id})
+    const url = `${WEBSOCKET_BASE_URL}/ws/streams/${streamId}`;
     const ws = new WebSocket(url);
 
     ws.onopen = () => {
@@ -88,7 +89,7 @@ export default function LiveStreamScreen({ navigation, route }: Props) {
     };
 
     wsRef.current = ws;
-  }, [token, streamId, navigation]);
+  }, [streamId, navigation]);
 
   useEffect(() => {
     connectWs();
@@ -101,7 +102,10 @@ export default function LiveStreamScreen({ navigation, route }: Props) {
   const sendMessage = () => {
     const text = chatInput.trim();
     if (!text || !wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
-    wsRef.current.send(JSON.stringify({ type: 'chat', message: text }));
+    // Backend reads sender_name from JSON payload
+    wsRef.current.send(
+      JSON.stringify({ type: 'chat', message: text, sender_name: currentUser?.name ?? 'Viewer' }),
+    );
     setChatInput('');
   };
 
