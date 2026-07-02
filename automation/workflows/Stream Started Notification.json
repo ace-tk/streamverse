@@ -1,0 +1,127 @@
+{
+  "name": "Stream Started Notification",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "stream-started",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "ss-node-1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "stream-started-webhook"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ss-assign-1",
+              "name": "event",
+              "value": "={{ $json.body.event }}",
+              "type": "string"
+            },
+            {
+              "id": "ss-assign-2",
+              "name": "creator_name",
+              "value": "={{ $json.body.creator_name }}",
+              "type": "string"
+            },
+            {
+              "id": "ss-assign-3",
+              "name": "title",
+              "value": "={{ $json.body.title }}",
+              "type": "string"
+            },
+            {
+              "id": "ss-assign-4",
+              "name": "category",
+              "value": "={{ $json.body.category }}",
+              "type": "string"
+            },
+            {
+              "id": "ss-assign-5",
+              "name": "started_at",
+              "value": "={{ $json.body.started_at }}",
+              "type": "string"
+            },
+            {
+              "id": "ss-assign-6",
+              "name": "stream_id",
+              "value": "={{ $json.body.stream_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ss-node-2",
+      "name": "Extract Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "ss-node-3",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        0
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Fields": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "89210763-0369-4505-a59b-0608a1b77392",
+  "meta": {
+    "instanceId": "cd930f66a29914a87777e85e22539f930b79caa8e0765c32b0bc9f73b3ecd1b2"
+  },
+  "nodeGroups": [],
+  "id": "stream_started_workflow",
+  "tags": []
+}

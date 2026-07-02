@@ -5,39 +5,40 @@
       "parameters": {
         "httpMethod": "POST",
         "path": "test-automation",
-        "responseMode": "lastNode",
+        "responseMode": "responseNode",
         "options": {}
       },
-      "id": "1",
+      "id": "de80be1d-4005-43f5-8f14-af040057c5b5",
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        250,
-        300
+        0,
+        0
       ],
       "webhookId": "test-automation-webhook"
     },
     {
       "parameters": {
-        "keepOnlySet": true,
-        "values": {
-          "boolean": [
+        "assignments": {
+          "assignments": [
             {
+              "id": "assignment_1",
               "name": "received",
-              "value": true
+              "value": true,
+              "type": "boolean"
             }
           ]
         },
         "options": {}
       },
-      "id": "2",
+      "id": "21fe232c-4c44-4154-b49b-4b5e381c7aa3",
       "name": "Set Response",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        470,
-        300
+        224,
+        0
       ]
     },
     {
@@ -46,13 +47,13 @@
         "responseBody": "={\n  \"received\": {{ $json.received }}\n}",
         "options": {}
       },
-      "id": "3",
+      "id": "3e9b11e6-3f19-4828-87fc-031e4e1a6c42",
       "name": "Respond to Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        690,
-        300
+        448,
+        0
       ]
     }
   ],
@@ -83,7 +84,14 @@
   },
   "active": true,
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "binaryMode": "separate"
   },
-  "versionId": "1"
+  "versionId": "df390616-1938-4f4d-afc3-c28540f486ee",
+  "meta": {
+    "instanceId": "cd930f66a29914a87777e85e22539f930b79caa8e0765c32b0bc9f73b3ecd1b2"
+  },
+  "nodeGroups": [],
+  "id": "oUh86H5lUir6OhXz",
+  "tags": []
 }

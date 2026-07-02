@@ -1,0 +1,127 @@
+{
+  "name": "Daily Digest",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "daily-digest",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "dd-node-1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "daily-digest-webhook"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "dd-assign-1",
+              "name": "generated",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "dd-assign-2",
+              "name": "date",
+              "value": "={{ $json.body.date }}",
+              "type": "string"
+            },
+            {
+              "id": "dd-assign-3",
+              "name": "total_streams",
+              "value": "={{ $json.body.total_streams }}",
+              "type": "number"
+            },
+            {
+              "id": "dd-assign-4",
+              "name": "top_stream",
+              "value": "={{ $json.body.top_stream.title }}",
+              "type": "string"
+            },
+            {
+              "id": "dd-assign-5",
+              "name": "top_creator",
+              "value": "={{ $json.body.top_stream.creator }}",
+              "type": "string"
+            },
+            {
+              "id": "dd-assign-6",
+              "name": "peak_viewers",
+              "value": "={{ $json.body.top_stream.peak_viewers }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "dd-node-2",
+      "name": "Format Digest",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "dd-node-3",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        0
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Format Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Digest": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6313f2e2-8ab6-4265-aebb-56a48cdb6af7",
+  "meta": {
+    "instanceId": "cd930f66a29914a87777e85e22539f930b79caa8e0765c32b0bc9f73b3ecd1b2"
+  },
+  "nodeGroups": [],
+  "id": "daily_digest_workflow",
+  "tags": []
+}

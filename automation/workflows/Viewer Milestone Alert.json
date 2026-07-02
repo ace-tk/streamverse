@@ -1,0 +1,172 @@
+{
+  "name": "Viewer Milestone Alert",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "viewer-milestone",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "vm-node-1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "viewer-milestone-webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "vm-cond-1",
+              "leftValue": "={{ $json.body.milestone }}",
+              "rightValue": 10,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "vm-node-2",
+      "name": "Check Milestone",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "vm-assign-1",
+              "name": "event",
+              "value": "={{ $json.body.event }}",
+              "type": "string"
+            },
+            {
+              "id": "vm-assign-2",
+              "name": "creator_name",
+              "value": "={{ $json.body.creator_name }}",
+              "type": "string"
+            },
+            {
+              "id": "vm-assign-3",
+              "name": "viewer_count",
+              "value": "={{ $json.body.viewer_count }}",
+              "type": "number"
+            },
+            {
+              "id": "vm-assign-4",
+              "name": "milestone",
+              "value": "={{ $json.body.milestone }}",
+              "type": "number"
+            },
+            {
+              "id": "vm-assign-5",
+              "name": "stream_id",
+              "value": "={{ $json.body.stream_id }}",
+              "type": "string"
+            },
+            {
+              "id": "vm-assign-6",
+              "name": "timestamp",
+              "value": "={{ $json.body.timestamp }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "vm-node-3",
+      "name": "Extract Milestone",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        448,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "vm-node-4",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        672,
+        -80
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Check Milestone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Milestone": {
+      "main": [
+        [
+          {
+            "node": "Extract Milestone",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Extract Milestone": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "231d33d4-c7ba-48ce-9287-bc2fff2d6b2f",
+  "meta": {
+    "instanceId": "cd930f66a29914a87777e85e22539f930b79caa8e0765c32b0bc9f73b3ecd1b2"
+  },
+  "nodeGroups": [],
+  "id": "viewer_milestone_workflow",
+  "tags": []
+}
