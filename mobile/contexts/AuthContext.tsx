@@ -4,19 +4,21 @@ import { AuthUser } from '@/types';
 import { AUTH_TOKEN_KEY } from '@/services/api';
 
 interface AuthContextValue {
-  user: AuthUser | null;
+  currentUser: AuthUser | null;
   token: string | null;
-  isLoading: boolean;
+  loading: boolean;
+  isAuthenticated: boolean;
   login: (token: string, user: AuthUser) => Promise<void>;
+  signup: (token: string, user: AuthUser) => Promise<void>;
   logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   // Rehydrate from storage on mount
   useEffect(() => {
@@ -26,10 +28,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const storedUser = await AsyncStorage.getItem('@streamverse/user');
         if (storedToken && storedUser) {
           setToken(storedToken);
-          setUser(JSON.parse(storedUser));
+          setCurrentUser(JSON.parse(storedUser));
         }
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     })();
   }, []);
@@ -38,17 +40,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await AsyncStorage.setItem(AUTH_TOKEN_KEY, newToken);
     await AsyncStorage.setItem('@streamverse/user', JSON.stringify(newUser));
     setToken(newToken);
-    setUser(newUser);
+    setCurrentUser(newUser);
   }, []);
+
+  const signup = useCallback(async (newToken: string, newUser: AuthUser) => {
+    await login(newToken, newUser);
+  }, [login]);
 
   const logout = useCallback(async () => {
     await AsyncStorage.multiRemove([AUTH_TOKEN_KEY, '@streamverse/user']);
     setToken(null);
-    setUser(null);
+    setCurrentUser(null);
   }, []);
 
+  const isAuthenticated = !!token;
+
   return (
-    <AuthContext.Provider value={{ user, token, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ currentUser, token, loading, isAuthenticated, login, signup, logout }}>
       {children}
     </AuthContext.Provider>
   );

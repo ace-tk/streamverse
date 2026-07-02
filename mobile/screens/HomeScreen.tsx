@@ -1,11 +1,17 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer } from '@/components/ScreenContainer';
 import { PrimaryButton } from '@/components/PrimaryButton';
+import { useAuth } from '@/contexts/AuthContext';
+import type { RootStackParamList } from '@/navigation/RootNavigator';
 
-export default function HomeScreen() {
+type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
+
+export default function HomeScreen({ navigation }: Props) {
   const theme = useTheme();
+  const { logout, currentUser } = useAuth();
 
   return (
     <ScreenContainer>
@@ -25,7 +31,7 @@ export default function HomeScreen() {
             variant="bodyLarge"
             style={[styles.tagline, { color: theme.colors.onSurfaceVariant }]}
           >
-            Real-Time Live Event Broadcasting
+            Welcome, {currentUser?.name || 'User'}!
           </Text>
         </View>
 
@@ -40,14 +46,21 @@ export default function HomeScreen() {
 
           <PrimaryButton
             label="🎙  I'm a Creator"
-            onPress={() => {}}
+            onPress={() => navigation.navigate('CreatorHome')}
             style={styles.btn}
           />
 
           <PrimaryButton
             label="👁  I'm a Viewer"
-            onPress={() => {}}
+            onPress={() => navigation.navigate('BrowseStreams')}
             mode="outlined"
+            style={styles.btn}
+          />
+
+          <PrimaryButton
+            label="Logout"
+            onPress={logout}
+            mode="text"
             style={styles.btn}
           />
         </View>

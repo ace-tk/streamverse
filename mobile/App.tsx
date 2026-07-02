@@ -6,9 +6,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StyleSheet } from 'react-native';
 
+import { NavigationContainer } from '@react-navigation/native';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ThemeProvider, useAppTheme } from '@/contexts/ThemeContext';
-import HomeScreen from '@/screens/HomeScreen';
+import { RootNavigator } from '@/navigation/RootNavigator';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,7 +27,9 @@ function AppContent() {
       <SafeAreaProvider>
         <AuthProvider>
           <StatusBar style={isDark ? 'light' : 'dark'} />
-          <HomeScreen />
+          <NavigationContainer theme={theme}>
+            <RootNavigator />
+          </NavigationContainer>
         </AuthProvider>
       </SafeAreaProvider>
     </PaperProvider>

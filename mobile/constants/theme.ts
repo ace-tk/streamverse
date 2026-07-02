@@ -21,6 +21,10 @@ export const CombinedLightTheme = {
     surface: '#FFFFFF',
     onPrimary: '#FFFFFF',
   },
+  fonts: {
+    ...NavigationLightTheme.fonts,
+    ...MD3LightTheme.fonts,
+  },
 };
 
 export const CombinedDarkTheme = {
@@ -34,6 +38,10 @@ export const CombinedDarkTheme = {
     background: '#0F0F14',
     surface: '#1A1A24',
     onPrimary: '#FFFFFF',
+  },
+  fonts: {
+    ...NavigationDarkTheme.fonts,
+    ...MD3DarkTheme.fonts,
   },
 };
 
