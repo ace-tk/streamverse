@@ -75,7 +75,31 @@ async def end_stream(
     # Close all associated websocket connections
     from backend.src.websocket.manager import manager
     await manager.close_stream(str(stream_id))
-    
+
+    # Compute duration in minutes (ended_at may be None if DB sets it async)
+    import datetime
+    ended_at = datetime.datetime.utcnow()
+    started_at = result.started_at
+    duration_minutes = 0
+    if started_at:
+        duration_minutes = max(0, int((ended_at - started_at.replace(tzinfo=None)).total_seconds() // 60))
+
+    asyncio.create_task(
+        automation_service.trigger_stream_ended(
+            stream_id=str(stream_id),
+            creator_id=str(current_user.id),
+            creator_name=current_user.name,
+            title=result.title,
+            category=result.category,
+            started_at=started_at.isoformat() if started_at else "",
+            ended_at=ended_at.isoformat(),
+            duration_minutes=duration_minutes,
+            peak_viewers=result.viewer_count,
+            total_messages=0,   # exact count not tracked in DB
+            final_viewers=0
+        )
+    )
+
     return result
 
 @router.get(
