@@ -7,6 +7,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer } from '@/components/ScreenContainer';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { LoadingIndicator } from '@/components/LoadingIndicator';
+import { LiveBadge } from '@/components/LiveBadge';
 import { streamService } from '@/services/streamService';
 import type { RootStackParamList } from '@/navigation/RootNavigator';
 import type { Stream } from '@/types';
@@ -51,13 +52,7 @@ export default function BrowseStreamsScreen({ navigation }: Props) {
           <Text variant="titleMedium" style={styles.streamTitle} numberOfLines={1}>
             {item.title}
           </Text>
-          <Chip
-            icon="broadcast"
-            style={styles.liveBadge}
-            textStyle={{ color: '#fff', fontWeight: '700', fontSize: 10 }}
-          >
-            LIVE
-          </Chip>
+          <LiveBadge />
         </View>
 
         <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }} numberOfLines={1}>
@@ -208,10 +203,7 @@ const styles = StyleSheet.create({
   streamTitle: {
     fontWeight: '700',
     flex: 1,
-  },
-  liveBadge: {
-    backgroundColor: '#E53935',
-    height: 24,
+    marginRight: 8,
   },
   divider: {
     marginVertical: 4,

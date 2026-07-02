@@ -7,6 +7,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer } from '@/components/ScreenContainer';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { LoadingIndicator } from '@/components/LoadingIndicator';
+import { LiveBadge } from '@/components/LiveBadge';
 import { useAuth } from '@/contexts/AuthContext';
 import { streamService } from '@/services/streamService';
 import type { RootStackParamList } from '@/navigation/RootNavigator';
@@ -67,13 +68,7 @@ export default function CreatorHomeScreen({ navigation }: Props) {
               {isLoading || isRefetching ? (
                 <LoadingIndicator />
               ) : myActiveStream ? (
-                <Chip
-                  icon="broadcast"
-                  style={{ backgroundColor: '#E53935' }}
-                  textStyle={{ color: '#fff', fontWeight: '700' }}
-                >
-                  LIVE
-                </Chip>
+                <LiveBadge />
               ) : (
                 <Chip icon="circle-outline" style={{ backgroundColor: theme.colors.surface }}>
                   Offline

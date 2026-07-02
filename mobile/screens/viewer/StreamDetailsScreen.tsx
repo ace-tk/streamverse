@@ -7,6 +7,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer } from '@/components/ScreenContainer';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { LoadingIndicator } from '@/components/LoadingIndicator';
+import { LiveBadge } from '@/components/LiveBadge';
 import { streamService } from '@/services/streamService';
 import type { RootStackParamList } from '@/navigation/RootNavigator';
 
@@ -57,15 +58,7 @@ export default function StreamDetailsScreen({ navigation, route }: Props) {
             style={styles.backButton}
             fullWidth={false}
           />
-          {isLive && (
-            <Chip
-              icon="broadcast"
-              style={styles.liveBadge}
-              textStyle={{ color: '#fff', fontWeight: '700' }}
-            >
-              LIVE
-            </Chip>
-          )}
+          {isLive && <LiveBadge />}
         </View>
 
         <View style={styles.titleSection}>
@@ -163,9 +156,6 @@ const styles = StyleSheet.create({
   },
   backButton: {
     marginLeft: -12,
-  },
-  liveBadge: {
-    backgroundColor: '#E53935',
   },
   titleSection: {
     gap: 12,
