@@ -17,9 +17,9 @@ export type RootStackParamList = {
   Home: undefined;
   CreatorHome: undefined;
   StartStream: undefined;
-  LiveStream: { streamId: string } | undefined;
+  LiveStream: { streamId: string };
   BrowseStreams: undefined;
-  StreamDetails: { streamId: string } | undefined;
+  StreamDetails: { streamId: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
