@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { View, StyleSheet, FlatList, RefreshControl } from 'react-native';
 import { Text, Card, useTheme, Searchbar, Chip, Divider } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
@@ -40,12 +41,15 @@ export default function BrowseStreamsScreen({ navigation }: Props) {
   }, [data?.items, searchQuery]);
 
   // ─── Render Items ───────────────────────────────────────────────────────────
-  const renderItem = ({ item }: { item: Stream }) => (
+  const renderItem = useCallback(({ item }: { item: Stream }) => (
     <Card
       style={styles.card}
       onPress={() => navigation.navigate('StreamDetails', { streamId: item.id })}
       mode="elevated"
       elevation={1}
+      accessible={true}
+      accessibilityRole="button"
+      accessibilityLabel={`View stream ${item.title} by ${item.creator?.name}`}
     >
       <Card.Content style={styles.cardContent}>
         <View style={styles.cardHeader}>
@@ -70,7 +74,7 @@ export default function BrowseStreamsScreen({ navigation }: Props) {
             <View />
           )}
           <View style={styles.viewerBadge}>
-            <Text style={{ fontSize: 12 }}>👁</Text>
+            <MaterialCommunityIcons name="eye" size={16} color={theme.colors.onSurfaceVariant} />
             <Text variant="labelMedium" style={{ fontWeight: '600' }}>
               {item.viewer_count}
             </Text>
@@ -78,13 +82,14 @@ export default function BrowseStreamsScreen({ navigation }: Props) {
         </View>
       </Card.Content>
     </Card>
-  );
+  ), [navigation, theme]);
 
   // ─── Error State ────────────────────────────────────────────────────────────
   if (isError && !data) {
     return (
       <ScreenContainer>
         <View style={styles.centerContainer}>
+          <MaterialCommunityIcons name="alert-circle-outline" size={64} color={theme.colors.error} style={{ marginBottom: 16 }} />
           <Text variant="titleMedium" style={{ color: theme.colors.error, marginBottom: 12 }}>
             Failed to load streams
           </Text>
@@ -138,10 +143,19 @@ export default function BrowseStreamsScreen({ navigation }: Props) {
           }
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center' }}>
+              <MaterialCommunityIcons 
+                name={searchQuery ? "magnify-close" : "broadcast-off"} 
+                size={64} 
+                color={theme.colors.onSurfaceVariant} 
+                style={{ opacity: 0.5, marginBottom: 16 }} 
+              />
+              <Text variant="titleMedium" style={{ color: theme.colors.onSurfaceVariant, marginBottom: 8, fontWeight: '700' }}>
+                {searchQuery ? "No Results" : "No Live Streams"}
+              </Text>
+              <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center' }}>
                 {searchQuery
-                  ? "No streams match your search."
-                  : "No live streams right now.\nCheck back later!"}
+                  ? "We couldn't find any streams matching your search."
+                  : "It's quiet right now.\nCheck back later!"}
               </Text>
               {!searchQuery && (
                 <PrimaryButton

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text, useTheme, Chip, Divider, Avatar } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
@@ -35,6 +36,7 @@ export default function StreamDetailsScreen({ navigation, route }: Props) {
     return (
       <ScreenContainer>
         <View style={styles.centerContainer}>
+          <MaterialCommunityIcons name="alert-circle-outline" size={64} color={theme.colors.error} style={{ marginBottom: 16 }} />
           <Text variant="titleMedium" style={{ color: theme.colors.error, marginBottom: 12 }}>
             Failed to load stream details
           </Text>
@@ -92,8 +94,8 @@ export default function StreamDetailsScreen({ navigation, route }: Props) {
         </View>
 
         <View style={styles.statsSection}>
-          <View style={[styles.statBox, { backgroundColor: theme.colors.surfaceVariant }]}>
-            <Text style={{ fontSize: 24, marginBottom: 4 }}>👁</Text>
+          <View style={[styles.statBox, { backgroundColor: theme.colors.surfaceVariant }]} accessible={true} accessibilityLabel={`${stream.viewer_count} Viewers`}>
+            <MaterialCommunityIcons name="eye" size={24} color={theme.colors.onSurface} style={{ marginBottom: 4 }} />
             <Text variant="titleLarge" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
               {stream.viewer_count}
             </Text>
@@ -101,8 +103,8 @@ export default function StreamDetailsScreen({ navigation, route }: Props) {
               Viewers
             </Text>
           </View>
-          <View style={[styles.statBox, { backgroundColor: theme.colors.surfaceVariant }]}>
-            <Text style={{ fontSize: 24, marginBottom: 4 }}>📅</Text>
+          <View style={[styles.statBox, { backgroundColor: theme.colors.surfaceVariant }]} accessible={true} accessibilityLabel={`Started on ${new Date(stream.started_at).toLocaleDateString()}`}>
+            <MaterialCommunityIcons name="calendar" size={24} color={theme.colors.onSurface} style={{ marginBottom: 4 }} />
             <Text variant="titleLarge" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
               {new Date(stream.started_at).toLocaleDateString()}
             </Text>

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { StyleSheet, View, FlatList, KeyboardAvoidingView, Platform, AppState, AppStateStatus } from 'react-native';
 import { Text, useTheme, Snackbar, TextInput, Divider } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
@@ -202,6 +203,31 @@ export default function LiveStreamScreen({ navigation, route }: Props) {
     navigation.goBack();
   };
 
+  // ─── Render Chat Item ───────────────────────────────────────────────────────
+  const renderChatItem = useCallback(({ item }: { item: ChatMessage }) => {
+    const isMe = item.sender_name === currentUser?.name;
+    return (
+      <View
+        style={[
+          styles.bubble,
+          {
+            backgroundColor: isMe ? theme.colors.primaryContainer : theme.colors.surfaceVariant,
+            alignSelf: isMe ? 'flex-end' : 'flex-start',
+          },
+        ]}
+        accessible={true}
+        accessibilityLabel={`Message from ${item.sender_name}: ${item.message}`}
+      >
+        <Text variant="labelSmall" style={{ color: theme.colors.primary, fontWeight: '700' }}>
+          {item.sender_name}
+        </Text>
+        <Text variant="bodySmall" style={{ color: theme.colors.onSurface }}>
+          {item.message}
+        </Text>
+      </View>
+    );
+  }, [currentUser?.name, theme]);
+
   // ─── Loading ──────────────────────────────────────────────────────────────
   if (streamLoading || !stream) {
     return <LoadingIndicator fullScreen />;
@@ -244,7 +270,7 @@ export default function LiveStreamScreen({ navigation, route }: Props) {
 
             {/* Viewer count */}
             <View style={styles.viewerBadge}>
-              <Text style={[styles.viewerIcon, { color: theme.colors.onSurface }]}>👁</Text>
+              <MaterialCommunityIcons name="eye" size={16} color={theme.colors.onSurface} />
               <Text
                 variant="labelLarge"
                 style={{ color: theme.colors.onSurface, fontWeight: '700' }}
@@ -266,38 +292,17 @@ export default function LiveStreamScreen({ navigation, route }: Props) {
           contentContainerStyle={styles.chatContent}
           onLayout={() => flatListRef.current?.scrollToEnd({ animated: false })}
           ListEmptyComponent={
-            <Text
-              variant="bodySmall"
-              style={[styles.emptyChat, { color: theme.colors.onSurfaceVariant }]}
-            >
-              No messages yet. Say something!
-            </Text>
-          }
-          renderItem={({ item }) => (
-            <View
-              style={[
-                styles.bubble,
-                {
-                  backgroundColor:
-                    item.sender_name === currentUser?.name
-                      ? theme.colors.primaryContainer
-                      : theme.colors.surfaceVariant,
-                  alignSelf:
-                    item.sender_name === currentUser?.name ? 'flex-end' : 'flex-start',
-                },
-              ]}
-            >
+            <View style={styles.emptyChatContainer}>
+              <MaterialCommunityIcons name="chat-outline" size={32} color={theme.colors.onSurfaceVariant} style={{ opacity: 0.5, marginBottom: 8 }} />
               <Text
-                variant="labelSmall"
-                style={{ color: theme.colors.primary, fontWeight: '700' }}
+                variant="bodySmall"
+                style={[styles.emptyChat, { color: theme.colors.onSurfaceVariant }]}
               >
-                {item.sender_name}
-              </Text>
-              <Text variant="bodySmall" style={{ color: theme.colors.onSurface }}>
-                {item.message}
+                No messages yet. Say something!
               </Text>
             </View>
-          )}
+          }
+          renderItem={renderChatItem}
         />
 
         {/* ── Chat input ─────────────────────────────────── */}
@@ -393,9 +398,12 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'flex-end',
   },
+  emptyChatContainer: {
+    alignItems: 'center',
+    marginTop: 40,
+  },
   emptyChat: {
     textAlign: 'center',
-    marginTop: 40,
   },
   bubble: {
     maxWidth: '78%',

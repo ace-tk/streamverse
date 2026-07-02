@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, ScrollView } from 'react-native';
 import { Text, Card, useTheme, Divider, Chip } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
@@ -32,6 +33,14 @@ export default function CreatorHomeScreen({ navigation }: Props) {
   );
 
   const totalViewers = myActiveStream?.viewer_count ?? 0;
+
+  if (isLoading && !isRefetching) {
+    return (
+      <ScreenContainer>
+        <LoadingIndicator fullScreen />
+      </ScreenContainer>
+    );
+  }
 
   return (
     <ScreenContainer>
@@ -113,12 +122,15 @@ export default function CreatorHomeScreen({ navigation }: Props) {
                 />
               </>
             ) : (
-              <Text
-                variant="bodyMedium"
-                style={[styles.noStream, { color: theme.colors.onSurfaceVariant }]}
-              >
-                You don't have an active stream. Start one below!
-              </Text>
+              <View style={styles.emptyState}>
+                <MaterialCommunityIcons name="broadcast-off" size={48} color={theme.colors.onSurfaceVariant} style={{ opacity: 0.5, marginBottom: 8 }} />
+                <Text
+                  variant="bodyMedium"
+                  style={[styles.noStream, { color: theme.colors.onSurfaceVariant }]}
+                >
+                  You don't have an active stream. Start one below!
+                </Text>
+              </View>
             )}
           </Card.Content>
         </Card>
@@ -194,9 +206,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 2,
   },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: 16,
+  },
   noStream: {
     textAlign: 'center',
-    paddingVertical: 8,
   },
   liveBtn: {
     marginTop: 4,
