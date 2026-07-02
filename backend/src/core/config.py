@@ -22,6 +22,10 @@ class Settings(BaseSettings):
     JWT_SECRET_KEY: str = "secret"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
 
+    # Automation (n8n)
+    N8N_ENABLED: bool = True
+    N8N_WEBHOOK_BASE_URL: str = "http://localhost:5678/webhook"
+
     model_config = SettingsConfigDict(env_file=str(ENV_FILE_PATH), env_file_encoding="utf-8", extra="ignore")
 
 settings = Settings()
